@@ -60,7 +60,7 @@ class Fist(pg.sprite.Sprite):
 class Chimp(pg.sprite.Sprite):
     """moves a monkey critter across the screen. it can spin the
        monkey when it is punched."""
-    def __init__(self):
+    def __init__(self, background, background_color):
         pg.sprite.Sprite.__init__(self)  # call Sprite intializer
         self.image, self.rect = load_image('chimp.bmp', -1)
         screen = pg.display.get_surface()
@@ -68,6 +68,8 @@ class Chimp(pg.sprite.Sprite):
         self.rect.topleft = 10, 10
         self.move = 9
         self.dizzy = 0
+        self.background = background
+        self.background_color = background_color
 
     def update(self):
         """walk or spin, depending on the monkeys state"""
@@ -85,6 +87,14 @@ class Chimp(pg.sprite.Sprite):
                 self.move = -self.move
                 newpos = self.rect.move((self.move, 0))
                 self.image = pg.transform.flip(self.image, 1, 0)
+            if self.rect.right % 13 == 0:
+                self.image = pg.transform.flip(self.image, 1, 0)
+                if self.background_color == (211, 4, 4):
+                    self.background_color = (153, 229, 80)
+                    self.background.fill(self.background_color)
+                else:
+                    self.background_color = (211, 4, 4)
+                    self.background.fill(self.background_color)
             self.rect = newpos
 
     def _spin(self):
@@ -106,7 +116,6 @@ class Chimp(pg.sprite.Sprite):
             self.original = self.image
 
 
-
 def main():
 
     # Initialize Everything
@@ -119,12 +128,13 @@ def main():
     
     background = pg.Surface(screen.get_size())
     background = background.convert()
-    background.fill((250, 250, 250))
+    background_color = (211, 4, 4)
+    background.fill(background_color)
 
     if pg.font:
         font = pg.font.Font(None, 36)
-        text = font.render("Pummel The Chimp, And Win $$$", 1, (10, 10, 10))
-        textpos = text.get_rect(centerx=background.get_width()/2)
+        widtext = font.render("Punch the Chimp, Redeem FREE ipod", 1, (153, 229, 80))
+        textpos = text.get_rect(centerx=background.get_th()/2)
         background.blit(text, textpos)
 
         
@@ -133,7 +143,7 @@ def main():
 
     whiff_sound = load_sound('whiff.wav')
     punch_sound = load_sound('punch.wav')
-    chimp = Chimp()
+    chimp = Chimp(background, background_color)
     fist = Fist()
     allsprites = pg.sprite.RenderPlain((fist, chimp))
     clock = pg.time.Clock()
@@ -157,6 +167,8 @@ def main():
 
         allsprites.update()
 
+        
+        pg.display.update()
         screen.blit(background, (0, 0))
         allsprites.draw(screen)
         pg.display.flip()
